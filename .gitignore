@@ -1,0 +1,16 @@
+# Ignora pastas de ambientes virtuais
+venv/
+
+# Ignora dependências do Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# Ignora arquivos específicos do Docker
+.env
+.DS_Store
+
+# Ignora dependências do Node (para o Frontend)
+node_modules/
+dist/

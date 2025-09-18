@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # Backend 
+  backend:
+    build: ./backend
+    container_name: backend_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_QUEUE=telemetry_queue
+    depends_on:
+      - rabbitmq
+      - db
+
+  # Worker
+  worker:
+    build: ./worker
+    container_name: worker_consumer
+    volumes:
+      - ./worker:/app
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_QUEUE=telemetry_queue
+      - DB_HOST=db
+      - DB_USER=testeiotdb
+      - DB_PASSWORD=iotdb2025
+      - DB_NAME=iotdb
+    depends_on:
+      - rabbitmq
+      - db
+
+  # PostgreSQL
+  db:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=testeiotdb
+      - POSTGRES_PASSWORD=iotdb2025
+      - POSTGRES_DB=iotdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq_server
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  # Redis
+  redis:
+    image: redis:6-alpine
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
