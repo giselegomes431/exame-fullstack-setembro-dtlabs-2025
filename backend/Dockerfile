@@ -7,7 +7,7 @@ WORKDIR /app
 # Copia o arquivo de dependências para o contêiner
 COPY requirements.txt .
 
-# Instala as dependências
+# Instala as dependências de forma segura
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copia o restante do seu código para o contêiner
