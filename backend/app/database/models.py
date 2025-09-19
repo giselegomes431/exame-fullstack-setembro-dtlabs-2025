@@ -1,6 +1,7 @@
 # backend/app/database/models.py
 
-from sqlalchemy import Column, Integer, String, DateTime, Float
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, JSON
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 import uuid
@@ -15,6 +16,7 @@ class User(Base):
     hashed_password = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    notifications = relationship("Notification", back_populates="user")
 
 # --- Modelo do Dispositivo ---
 class Device(Base):
@@ -28,6 +30,7 @@ class Device(Base):
     user_id = Column(UUID(as_uuid=True))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    notifications = relationship("Notification", back_populates="device")
 
 # --- Modelo de Telemetria ---
 class Telemetry(Base):
@@ -41,3 +44,19 @@ class Telemetry(Base):
     latency = Column(Float)
     connectivity = Column(Integer)
     boot_date = Column(DateTime)
+    
+# --- Modelo de Notificação ---
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    device_uuid = Column(UUID(as_uuid=True), ForeignKey('devices.uuid'), nullable=True) # Pode ser nulo se for para todos os devices
+    parameter = Column(String, index=True) # Ex: 'cpu_usage'
+    operator = Column(String, default=">") # Ex: '>' ou '<'
+    threshold = Column(Float) # Ex: 70.0
+    message = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="notifications")
+    device = relationship("Device", back_populates="notifications")
