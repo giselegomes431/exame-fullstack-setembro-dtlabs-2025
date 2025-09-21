@@ -44,6 +44,7 @@ class Telemetry(Base):
     latency = Column(Float)
     connectivity = Column(Integer)
     boot_date = Column(DateTime)
+    device_uuid = Column(UUID(as_uuid=True), ForeignKey('devices.uuid'), nullable=False, index=True)
     
 # --- Modelo de Notificação ---
 class Notification(Base):
