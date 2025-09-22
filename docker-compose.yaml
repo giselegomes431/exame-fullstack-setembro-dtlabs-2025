@@ -19,6 +19,17 @@ services:
       db:
         condition: service_healthy
 
+  frontend:
+    build: ./frontend
+    container_name: frontend_app
+    ports:
+      - "3000:5173"  # Mapeia a porta 3000 da sua máquina para a porta do contêiner
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+      
   # Worker
   worker:
     build: ./worker

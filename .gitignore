@@ -14,3 +14,6 @@ __pycache__/
 # Ignora dependências do Node (para o Frontend)
 node_modules/
 dist/
+
+# Ignorar o arquivo de variáveis de ambiente
+.env
