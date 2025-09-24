@@ -8,6 +8,7 @@ import Signup from './pages/Signup';
 import Layout from './components/common/Layout'; 
 import Devices from './pages/Devices';
 import DeviceRegistration from './pages/DeviceRegistration';
+import Notifications from './pages/Notifications';
 
 // PrivateRoute component to protect routes
 const PrivateRoute = () => {
@@ -31,6 +32,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/devices" element={<Devices />} />
         <Route path="/devices/register" element={<DeviceRegistration />} />
+        <Route path="/notifications" element={<Notifications />} />
       </Route>
     </Routes>
   );
