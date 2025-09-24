@@ -1,7 +1,6 @@
-// src/components/common/Sidebar.tsx
 import styled from 'styled-components';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FaHome, FaMicrochip, FaBell, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaMicrochip, FaBell, FaSignOutAlt, FaPlusSquare } from 'react-icons/fa';
 
 const SidebarContainer = styled.aside`
   width: 250px;
@@ -11,7 +10,7 @@ const SidebarContainer = styled.aside`
   flex-direction: column;
   gap: 10px;
   border-right: 1px solid #333;
-  justify-content: space-between; /* Novo estilo para empurrar o logout para o fundo */
+  justify-content: space-between;
 `;
 
 const NavItems = styled.div`
@@ -46,7 +45,7 @@ const NavItem = styled(NavLink)`
 `;
 
 const LogoutContainer = styled.div`
-  margin-top: auto; /* Empurra o contêiner para a parte inferior */
+  margin-top: auto;
 `;
 
 const LogoutButton = styled.button`
@@ -65,7 +64,7 @@ const LogoutButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: #dc3545; /* Cor de destaque para o logout */
+    background-color: #dc3545;
     color: #fff;
   }
 `;
@@ -85,9 +84,13 @@ function Sidebar() {
           <FaHome />
           Dashboard
         </NavItem>
-        <NavItem to="/devices">
+        <NavItem to="/devices" end>
           <FaMicrochip />
-          Devices
+          Devices (Gráficos)
+        </NavItem>
+        <NavItem to="/devices/register">
+          <FaPlusSquare />
+          Registro de Dispositivos
         </NavItem>
         <NavItem to="/notifications">
           <FaBell />

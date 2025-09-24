@@ -1,12 +1,11 @@
 import styled from 'styled-components';
-import Header from './Header';
 import Sidebar from './Sidebar';
 
 const PageWrapper = styled.div`
   display: flex;
-  min-height: 100vh;
-  background-color: #121212;
-  color: #e0e0e0;
+  height: 100vh; /* A altura total da página é 100% da viewport */
+  background-color: #1a1b26;
+  color: #c0c0c0;
   font-family: 'Poppins', sans-serif;
 `;
 
@@ -14,11 +13,17 @@ const MainContent = styled.main`
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* O contêiner principal esconde o overflow vertical */
 `;
 
 const ContentArea = styled.div`
-  flex-grow: 1;
+  flex-grow: 1; /* Ocupa todo o espaço vertical restante */
   padding: 40px;
+  overflow-y: auto; /* Apenas esta área terá a barra de rolagem vertical */
+
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
 `;
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -26,7 +31,6 @@ function Layout({ children }: { children: React.ReactNode }) {
     <PageWrapper>
       <Sidebar />
       <MainContent>
-        <Header />
         <ContentArea>
           {children}
         </ContentArea>
