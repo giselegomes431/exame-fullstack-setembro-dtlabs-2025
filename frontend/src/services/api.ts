@@ -20,11 +20,18 @@ api.interceptors.request.use(
   }
 );
 
+export interface AuthResponse {
+  access_token: string;
+  user_id: string; // O ID único do usuário, crucial para o SocketIO
+  username: string; // Nome do usuário
+  // Se houverem outros campos (ex: token_type), adicione-os aqui
+}
+
 // --- Export the api constant itself for use in AuthContext ---
 export { api };
 
 // --- Public Authentication Routes ---
-export const login = (credentials: any) => api.post('/api/v1/login', credentials);
+export const login = (credentials: any) => api.post<AuthResponse>('/api/v1/login', credentials);
 export const register = (credentials: any) => api.post('/api/v1/register', credentials);
 
 // --- Private Device Routes ---

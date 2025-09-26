@@ -15,6 +15,11 @@ interface Device {
   };
 }
 
+interface HomePageProps {
+    onLogout: () => void;
+    userId: string | null;
+}
+
 // Estilos com Styled-components (apenas estilos específicos da Home)
 const PageHeader = styled.header`
   margin-bottom: 40px;
@@ -96,7 +101,7 @@ const EmptyState = styled.div`
   font-size: 1.1rem;
 `;
 
-function Home() {
+function Home(props: HomePageProps) {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

@@ -6,7 +6,13 @@ import { Button } from '../components/common/Button';
 import { LinkText } from '../components/common/LinkText';
 import { register } from '../services/api';
 
-function Signup() {
+interface SignupPageProps {
+    // Adiciona a prop que o App.tsx está enviando, e ela é usada para redirecionar após o sucesso
+    onLoginSuccess: (data: any) => void; // Usamos 'any' aqui para simplificar o tipo de retorno
+}
+
+
+function Signup({ onLoginSuccess }: SignupPageProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,7 +27,7 @@ function Signup() {
     }
     try {
       await register({ username, password }); 
-      navigate('/login');
+      onLoginSuccess({});
     } catch (err) {
       setError('Erro ao cadastrar. Tente outro nome de usuário.');
       console.error(err);

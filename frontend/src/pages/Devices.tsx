@@ -36,6 +36,11 @@ interface HistoricalData {
   temperature: number[];
 }
 
+interface DevicesPageProps {
+    userId: string | null;
+}
+
+
 // --- Estilos dos Componentes ---
 const MainContent = styled.main`
   flex: 1;
@@ -90,7 +95,7 @@ const Subtitle = styled.p`
 `;
 
 // --- Componente da Página ---
-function Devices() {
+function Devices({ userId }: DevicesPageProps) {
   const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<string>("");
   const [historicalData, setHistoricalData] = useState<HistoricalData>({

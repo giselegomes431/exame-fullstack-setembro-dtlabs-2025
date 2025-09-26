@@ -5,7 +5,7 @@ import {
   getNotifications,
   createNotification,
 } from "../services/api";
-import { socket } from "../services/websocket"; // Importa a instância do socket
+import { setupSocketConnection } from "../services/websocket"; // Importa a instância do socket
 
 // --- Interfaces de Dados ---
 interface Device {
@@ -21,6 +21,16 @@ interface NotificationRule {
   threshold: number;
   message: string;
   created_at: string;
+}
+
+interface AlertPayload {
+  message: string;
+  device_uuid: string;
+}
+
+interface NotificationsPageProps {
+  userId: string | null; // <-- Propriedade essencial
+  socketInstance: any | null; // Instância do socket passada do App.tsx
 }
 
 // --- Estilos dos Componentes ---
@@ -144,12 +154,12 @@ const Subtitle = styled.p`
 `;
 
 // --- Componente Principal ---
-function Notifications() {
+function Notifications({ userId, socketInstance }: NotificationsPageProps) {
   const [devices, setDevices] = useState<Device[]>([]);
   const [configuredNotifications, setConfiguredNotifications] = useState<
     NotificationRule[]
   >([]);
-  const [realTimeAlerts, setRealTimeAlerts] = useState<any[]>([]); // Estado para alertas em tempo real
+  const [realTimeAlerts, setRealTimeAlerts] = useState<AlertPayload[]>([]); // Estado para alertas em tempo real
   const [formData, setFormData] = useState({
     device_uuid: "",
     parameter: "cpu_usage",
@@ -158,22 +168,31 @@ function Notifications() {
     message: "",
   });
 
-  // useEffect para buscar dados e configurar o WebSocket
+  // 1. LÓGICA DE CONEXÃO E LIMPEZA
+
+  // 1. LÓGICA DE CONEXÃO (Roda apenas quando userId muda)
   useEffect(() => {
     fetchDevices();
     fetchConfiguredNotifications();
 
-    // Listener para o evento de notificação em tempo real
-    socket.on("notification_event", (data) => {
-      console.log("Alerta de notificação em tempo real recebido:", data);
-      setRealTimeAlerts((prev) => [data, ...prev]);
-    });
-
-    // Limpeza dos listeners ao desmontar o componente
+    // Limpe a lógica de inicialização do socket aqui, ela agora está no App.tsx
+    if (socketInstance) {
+      // 2. Listener para o evento de notificação em tempo real
+      console.log("Socket está conectado e pronto para listeners.");
+      socketInstance.on("new_notification", (data: AlertPayload) => {
+        console.log("Alerta de notificação em tempo real recebido:", data);
+        setRealTimeAlerts((prev) => [data, ...prev]);
+      });
+    } else {
+      console.error("SocketInstance é nulo. A conexão falhou no App.tsx.");
+    }
     return () => {
-      socket.off("notification_event");
+      if (socketInstance) {
+        // Remove o listener para evitar duplicação
+        socketInstance.off("new_notification");
+      }
     };
-  }, []); // Dependência vazia para rodar apenas uma vez na montagem do componente
+  }, [userId, socketInstance]); // CHAVE: Executa sempre que o userId muda
 
   const fetchDevices = async () => {
     try {

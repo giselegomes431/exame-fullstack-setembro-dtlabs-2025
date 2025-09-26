@@ -5,9 +5,15 @@ import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
 import { LinkText } from '../components/common/LinkText';
 import { login } from '../services/api';
+import type { AuthResponse } from '../services/api';
 
-
-function Login() {
+interface LoginPageProps {
+    onLoginSuccess: (data: AuthResponse) => void; // <-- Nova prop
+    // Adicione props opcionais que o App.tsx envia, se necessário:
+    isRegisterView?: boolean;
+    onRegister?: (data: any) => Promise<void>; 
+}
+function Login(props: LoginPageProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,7 +23,9 @@ function Login() {
     e.preventDefault();
     try {
       const response = await login({ username, password });
+      props.onLoginSuccess(response.data);
       localStorage.setItem('token', response.data.access_token);
+      localStorage.setItem("userId", response.data.user_id);
       navigate('/');
     } catch (err) {
       setError('Credenciais inválidas. Tente novamente.');
