@@ -30,6 +30,19 @@ services:
     depends_on:
       - backend
       
+   # Serviço do Simulador de Telemetria
+  simulator:
+    build: ./simulator
+    container_name: iot_simulator
+    volumes:
+      - ./simulator:/app
+    environment:
+      - BACKEND_URL=http://backend:8000 # O nome do serviço do backend
+      - SIM_USERNAME=user1_sim 
+      - SIM_PASSWORD=pass123  
+    depends_on:
+      - backend
+      
   # Worker
   worker:
     build: ./worker

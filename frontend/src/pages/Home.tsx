@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { getDevices } from '../services/api';
-import { PageWrapper } from '../components/common/PageWrapper';
+import { useEffect, useState } from "react";
+import styled from "styled-components";
+import { getDevices, getLatestTelemetry } from "../services/api";
+import { PageWrapper } from "../components/common/PageWrapper";
 
 // ... (Tipagens) ...
 interface Device {
@@ -99,30 +99,29 @@ const EmptyState = styled.div`
 function Home() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [latestTelemetry, setLatestTelemetry] = useState<any>({}); // <-- Novo estado para a telemetria
 
   useEffect(() => {
-    const fetchDevices = async () => {
+    const fetchDevicesAndTelemetry = async () => {
       try {
-        const response = await getDevices();
-        // Apenas simulação de dados de telemetria, já que não há gráficos
-        const devicesWithTelemetry = response.data.map((device: any) => ({
-          ...device,
-          history: {
-            cpu_usage: Array.from({ length: 1 }, () => Math.floor(Math.random() * 100)),
-            ram_usage: Array.from({ length: 1 }, () => Math.floor(Math.random() * 100)),
-            temperature: Array.from({ length: 1 }, () => Math.floor(Math.random() * 60) + 20),
-          },
-        }));
-        setDevices(devicesWithTelemetry);
+        // Busca os dispositivos do usuário
+        const devicesResponse = await getDevices();
+        setDevices(devicesResponse.data);
+
+        // Busca a telemetria mais recente para esses dispositivos
+        if (devicesResponse.data.length > 0) {
+          const telemetryResponse = await getLatestTelemetry();
+          setLatestTelemetry(telemetryResponse.data);
+        }
       } catch (err) {
-        setError('Não foi possível carregar os dispositivos.');
+        setError("Não foi possível carregar os dispositivos e a telemetria.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDevices();
+    fetchDevicesAndTelemetry();
   }, []);
 
   if (loading) {
@@ -136,7 +135,9 @@ function Home() {
   if (error) {
     return (
       <PageWrapper>
-        <EmptyState style={{ border: '1px dashed red', color: 'red' }}>{error}</EmptyState>
+        <EmptyState style={{ border: "1px dashed red", color: "red" }}>
+          {error}
+        </EmptyState>
       </PageWrapper>
     );
   }
@@ -147,27 +148,27 @@ function Home() {
         <Title>Dashboard</Title>
         <Subtitle>Resumo rápido dos seus dispositivos.</Subtitle>
       </PageHeader>
-      
+
       <DevicesGrid>
         {devices.length > 0 ? (
           devices.map((device) => (
             <DeviceCard key={device.uuid}>
               <CardTitle>{device.name}</CardTitle>
               <CardSubtitle>{device.description}</CardSubtitle>
-              
+
               <StatItem>
                 <StatLabel>Uso de CPU</StatLabel>
-                <StatValue>{device.history?.cpu_usage.slice(-1)[0]}%</StatValue>
+                <StatValue>{latestTelemetry[device.uuid]?.cpu_usage || 'N/A'}%</StatValue>
               </StatItem>
               
               <StatItem>
                 <StatLabel>Uso de RAM</StatLabel>
-                <StatValue>{device.history?.ram_usage.slice(-1)[0]}%</StatValue>
+                <StatValue>{latestTelemetry[device.uuid]?.ram_usage || 'N/A'}%</StatValue>
               </StatItem>
 
               <StatItem>
                 <StatLabel>Temperatura</StatLabel>
-                <StatValue>{device.history?.temperature.slice(-1)[0]}°C</StatValue>
+                <StatValue>{latestTelemetry[device.uuid]?.temperature || 'N/A'}°C</StatValue>
               </StatItem>
             </DeviceCard>
           ))

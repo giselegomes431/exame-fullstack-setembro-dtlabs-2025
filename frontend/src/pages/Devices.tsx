@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { getDevices } from "../services/api";
+import { getDevices, getHistoricalData } from "../services/api";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -98,6 +98,7 @@ function Devices() {
     ram_usage: [],
     temperature: [],
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -110,35 +111,21 @@ function Devices() {
         }
       } catch (error) {
         console.error("Erro ao buscar dispositivos:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchDevices();
   }, []);
 
-  const fetchHistoricalData = async (
-    uuid: string,
-    period: string = "last_24h"
-  ) => {
+  const fetchHistoricalData = async (uuid: string, period: string = "last_24h") => {
     try {
-      // Simulação da chamada da API de telemetria
-      console.log(
-        `Buscando dados históricos para o dispositivo ${uuid} no período: ${period}`
-      );
-      const data = {
-        cpu_usage: Array.from({ length: 24 }, () =>
-          Math.floor(Math.random() * 100)
-        ),
-        ram_usage: Array.from({ length: 24 }, () =>
-          Math.floor(Math.random() * 100)
-        ),
-        temperature: Array.from(
-          { length: 24 },
-          () => Math.floor(Math.random() * 60) + 20
-        ),
-      };
-      setHistoricalData(data);
+      // Endpoint para buscar dados históricos de telemetria
+      const response = await getHistoricalData(uuid, period);
+      setHistoricalData(response.data);
     } catch (error) {
       console.error("Erro ao buscar dados históricos:", error);
+      setHistoricalData({ cpu_usage: [], ram_usage: [], temperature: [] });
     }
   };
 

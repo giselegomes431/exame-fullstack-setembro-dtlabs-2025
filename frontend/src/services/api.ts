@@ -1,11 +1,12 @@
-// src/services/api.ts
+// src/services/api.ts (código corrigido)
+
 import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Interceptor to inject the auth token into all private requests
+// Interceptor para injetar o token de autenticação
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -35,3 +36,9 @@ export const deleteDevice = (uuid: string) => api.delete(`/api/v1/devices/${uuid
 // --- Private Notification Routes ---
 export const getNotifications = () => api.get('/api/v1/notifications');
 export const createNotification = (notificationData: any) => api.post('/api/v1/notifications', notificationData);
+
+// --- Adicionada: Rota de Telemetria Mais Recente ---
+export const getLatestTelemetry = () => api.get('/api/v1/devices/latest-telemetry');
+export const getHistoricalData = (uuid: string, period: string) => api.get(`/api/v1/devices/${uuid}/historical`, {
+  params: { period }
+});
