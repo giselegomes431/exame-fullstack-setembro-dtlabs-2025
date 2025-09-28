@@ -13,7 +13,7 @@ import threading
 
 # Variável global para a instância do SocketIO
 sio_instance = None 
-
+main_loop_instance = None
 
 def compare_values(telemetry_value: float, operator: str, threshold: float) -> bool:
     """Função segura para comparar valores."""
@@ -35,10 +35,19 @@ def compare_values(telemetry_value: float, operator: str, threshold: float) -> b
     else:
         return False
 
+async def emit_alert(sio, user_id, message, device_uuid):
+    """Função assíncrona para emitir a notificação via SocketIO."""
+    # Await é CRÍTICO aqui para que o emit seja executado corretamente.
+    await sio.emit(
+        'new_notification',
+        {'message': message, 'device_uuid': device_uuid},
+        to=str(user_id) # Envia para a ROOM do usuário
+    )
+    print(f"[SOCKET.IO EMITIDO] Evento 'new_notification' enviado para room: {user_id}")
 
 def check_notification_rules(db: Session, telemetry_data: dict):
     """Verifica se alguma regra de notificação é acionada e dispara o WebSocket."""
-    global sio_instance
+    global sio_instance, main_loop_instance
 
     try:
         # Conversão segura do UUID (necessária após a lógica de simulação)
@@ -66,23 +75,21 @@ def check_notification_rules(db: Session, telemetry_data: dict):
         if isinstance(telemetry_value, (int, float)):
             if compare_values(telemetry_value, rule.operator, rule.threshold):
                 
-                # --- LÓGICA DE DISPARO DO WEBSOCKET ---
                 alert_message = f"ALERTA: {rule.message} | Device: {device.name} | {rule.parameter} é {telemetry_value}"
                 print(f"[ALERTA EMITIDO] {alert_message}")
 
-                # 1. Envia o evento via SocketIO
-                if sio_instance:
-                    # Obtenha o loop de eventos da thread principal
-                    loop = asyncio.get_event_loop()
-                    
-                    # Execute a função assíncrona de forma thread-safe
-                    asyncio.run_coroutine_threadsafe(
-                        sio_instance.emit(
-                            'new_notification',
-                            {'message': alert_message, 'device_uuid': str(device_uuid)},
-                            # room=str(device.user_id) 
-                        ),
-                        loop
+                # --- LÓGICA DE DISPARO DO WEBSOCKET CORRIGIDA ---
+                if sio_instance and main_loop_instance:
+                    # Chame start_background_task passando a nossa nova função async.
+                    # Isso garante que o SocketIO agende e espere (await) a execução no loop principal.
+                     future = asyncio.run_coroutine_threadsafe(
+                        emit_alert(
+                            sio_instance,
+                            rule.user_id,
+                            alert_message,
+                            str(device_uuid)
+                            ),
+                            main_loop_instance # Usa o loop global
                     )
 # FIM da função check_notification_rules
 
@@ -100,9 +107,10 @@ def rabbitmq_callback(ch, method, properties, body):
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
-def start_notification_listener(sio_app): # <-- Recebe a instância do SocketIO
+def start_notification_listener(sio_app, loop_app): # <-- Recebe a instância do SocketIO
     """Inicia o consumidor de notificações do backend."""
-    global sio_instance
+    global sio_instance, main_loop_instance
+    main_loop_instance = loop_app # Armazena o loop globalmente
     sio_instance = sio_app # Armazena a instância globalmente
     
     try:
