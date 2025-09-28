@@ -1,5 +1,3 @@
-# backend/app/api/endpoints/notifications.py
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ...database.base import get_db

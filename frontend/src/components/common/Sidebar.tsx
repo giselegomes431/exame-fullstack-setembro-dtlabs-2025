@@ -1,6 +1,12 @@
-import styled from 'styled-components';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { FaHome, FaMicrochip, FaBell, FaSignOutAlt, FaPlusSquare } from 'react-icons/fa';
+import styled from "styled-components";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  FaHome,
+  FaMicrochip,
+  FaBell,
+  FaSignOutAlt,
+  FaPlusSquare,
+} from "react-icons/fa";
 
 const SidebarContainer = styled.aside`
   width: 250px;
@@ -73,8 +79,8 @@ function Sidebar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (

@@ -5,7 +5,7 @@ import {
   getNotifications,
   createNotification,
 } from "../services/api";
-import { setupSocketConnection } from "../services/websocket"; // Importa a instância do socket
+import { setupSocketConnection } from "../services/websocket";
 
 // --- Interfaces de Dados ---
 interface Device {
@@ -29,8 +29,8 @@ interface AlertPayload {
 }
 
 interface NotificationsPageProps {
-  userId: string | null; // <-- Propriedade essencial
-  socketInstance: any | null; // Instância do socket passada do App.tsx
+  userId: string | null;
+  socketInstance: any | null;
 }
 
 // --- Estilos dos Componentes ---
@@ -159,7 +159,7 @@ function Notifications({ userId, socketInstance }: NotificationsPageProps) {
   const [configuredNotifications, setConfiguredNotifications] = useState<
     NotificationRule[]
   >([]);
-  const [realTimeAlerts, setRealTimeAlerts] = useState<AlertPayload[]>([]); // Estado para alertas em tempo real
+  const [realTimeAlerts, setRealTimeAlerts] = useState<AlertPayload[]>([]);
   const [formData, setFormData] = useState({
     device_uuid: "",
     parameter: "cpu_usage",
@@ -168,16 +168,12 @@ function Notifications({ userId, socketInstance }: NotificationsPageProps) {
     message: "",
   });
 
-  // 1. LÓGICA DE CONEXÃO E LIMPEZA
-
-  // 1. LÓGICA DE CONEXÃO (Roda apenas quando userId muda)
+  // LÓGICA DE CONEXÃO
   useEffect(() => {
     fetchDevices();
     fetchConfiguredNotifications();
 
-    // Limpe a lógica de inicialização do socket aqui, ela agora está no App.tsx
     if (socketInstance) {
-      // 2. Listener para o evento de notificação em tempo real
       console.log("Socket está conectado e pronto para listeners.");
       socketInstance.on("new_notification", (data: AlertPayload) => {
         console.log("Alerta de notificação em tempo real recebido:", data);
@@ -188,11 +184,10 @@ function Notifications({ userId, socketInstance }: NotificationsPageProps) {
     }
     return () => {
       if (socketInstance) {
-        // Remove o listener para evitar duplicação
         socketInstance.off("new_notification");
       }
     };
-  }, [userId, socketInstance]); // CHAVE: Executa sempre que o userId muda
+  }, [userId, socketInstance]);
 
   const fetchDevices = async () => {
     try {

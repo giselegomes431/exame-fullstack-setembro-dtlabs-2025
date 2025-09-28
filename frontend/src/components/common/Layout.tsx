@@ -1,12 +1,12 @@
-import styled from 'styled-components';
-import Sidebar from './Sidebar';
+import styled from "styled-components";
+import Sidebar from "./Sidebar";
 
 const PageWrapper = styled.div`
   display: flex;
   height: 100vh; /* A altura total da página é 100% da viewport */
   background-color: #1a1b26;
   color: #c0c0c0;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 `;
 
 const MainContent = styled.main`
@@ -31,9 +31,7 @@ function Layout({ children }: { children: React.ReactNode }) {
     <PageWrapper>
       <Sidebar />
       <MainContent>
-        <ContentArea>
-          {children}
-        </ContentArea>
+        <ContentArea>{children}</ContentArea>
       </MainContent>
     </PageWrapper>
   );

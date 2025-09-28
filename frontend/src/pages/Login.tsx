@@ -1,22 +1,26 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FormContainer, AuthCard, Title, Subtitle } from '../components/common/FormContainer';
-import { Input } from '../components/common/Input';
-import { Button } from '../components/common/Button';
-import { LinkText } from '../components/common/LinkText';
-import { login } from '../services/api';
-import type { AuthResponse } from '../services/api';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FormContainer,
+  AuthCard,
+  Title,
+  Subtitle,
+} from "../components/common/FormContainer";
+import { Input } from "../components/common/Input";
+import { Button } from "../components/common/Button";
+import { LinkText } from "../components/common/LinkText";
+import { login } from "../services/api";
+import type { AuthResponse } from "../services/api";
 
 interface LoginPageProps {
-    onLoginSuccess: (data: AuthResponse) => void; // <-- Nova prop
-    // Adicione props opcionais que o App.tsx envia, se necessário:
-    isRegisterView?: boolean;
-    onRegister?: (data: any) => Promise<void>; 
+  onLoginSuccess: (data: AuthResponse) => void;
+  isRegisterView?: boolean;
+  onRegister?: (data: any) => Promise<void>;
 }
 function Login(props: LoginPageProps) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,11 +28,11 @@ function Login(props: LoginPageProps) {
     try {
       const response = await login({ username, password });
       props.onLoginSuccess(response.data);
-      localStorage.setItem('token', response.data.access_token);
+      localStorage.setItem("token", response.data.access_token);
       localStorage.setItem("userId", response.data.user_id);
-      navigate('/');
+      navigate("/");
     } catch (err) {
-      setError('Credenciais inválidas. Tente novamente.');
+      setError("Credenciais inválidas. Tente novamente.");
       console.error(err);
     }
   };
@@ -38,8 +42,13 @@ function Login(props: LoginPageProps) {
       <AuthCard>
         <Title>Bem-vindo(a) de volta!</Title>
         <Subtitle>Faça login para continuar.</Subtitle>
-        {error && <p style={{ color: '#ff4d4d', textAlign: 'center' }}>{error}</p>}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {error && (
+          <p style={{ color: "#ff4d4d", textAlign: "center" }}>{error}</p>
+        )}
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+        >
           <Input
             type="text"
             placeholder="Nome de usuário"

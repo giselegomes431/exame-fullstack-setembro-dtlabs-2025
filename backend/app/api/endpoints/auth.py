@@ -8,11 +8,9 @@ from pydantic import BaseModel
 from datetime import timedelta
 import uuid
 
-# Cria um APIRouter para as rotas de autenticação
 router = APIRouter()
 
 # --- Modelos Pydantic para validação ---
-# O Pydantic garante que os dados da requisição têm o formato correto
 class UserCreate(BaseModel):
     username: str
     password: str
@@ -30,12 +28,10 @@ class TokenResponse(BaseModel):
 # --- Endpoints de Autenticação ---
 @router.post("/register", tags=["Authentication"])
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    # Verifica se o usuário já existe no banco de dados
     existing_user = db.query(User).filter(User.username == user.username).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     
-    # Faz o hash da senha antes de salvar
     hashed_password = hash_password(user.password)
     
     # Cria o novo usuário

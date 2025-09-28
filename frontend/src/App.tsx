@@ -9,21 +9,21 @@ import { register } from "./services/api";
 import DeviceRegistration from "./pages/DeviceRegistration";
 import { setupSocketConnection } from "./services/websocket";
 import { api } from "./services/api";
-import { Socket } from "socket.io-client"; // Importa a tipagem do socket
+import { Socket } from "socket.io-client";
 
 // --- Tipagens ---
 interface AuthData {
   access_token: string;
-  user_id: string; // CRUCIAL
+  user_id: string;
   username: string;
 }
 
-// PrivateRoute component to protect routes (Mantido da sua lógica)
+// PrivateRoute component to protect routes
 const PrivateRoute = () => {
   const isAuthenticated = localStorage.getItem("token") !== null;
   return isAuthenticated ? (
     <Layout>
-            <Outlet />   {" "}
+      <Outlet />{" "}
     </Layout>
   ) : (
     <Navigate to="/login" replace />
@@ -32,9 +32,9 @@ const PrivateRoute = () => {
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null); // Usamos o tipo Socket ou null para consistência
+  const [userId, setUserId] = useState<string | null>(null);
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
-  const navigate = useNavigate(); // --- Handlers de Autenticação ---
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -74,7 +74,7 @@ export default function App() {
         err.response?.data?.detail || "Registration failed."
       );
     }
-  }; // 1. Checagem e Restauração de Sessão
+  };
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -85,10 +85,9 @@ export default function App() {
       setUserId(storedUserId);
       api.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
     }
-  }, []); // 2. Lógica de Conexão do Socket (Executa SOMENTE quando o userId muda para um valor não-nulo)
+  }, []);
 
   useEffect(() => {
-    // Se o userId for nulo (não logado), apenas retorna.
     if (!userId) return;
 
     console.log(`[SOCKET INIT] Tentando conectar com userId: ${userId}`); // Limpa qualquer socket anterior para evitar duplicação
@@ -98,7 +97,7 @@ export default function App() {
 
     const newSocket = setupSocketConnection(userId);
     if (newSocket) {
-      setSocketInstance(newSocket); // 🚨 LISTENERS ESSENCIAIS DE DEBUG NO CLIENTE
+      setSocketInstance(newSocket);
 
       newSocket.on("connect", () => {
         console.log(
@@ -114,7 +113,7 @@ export default function App() {
           err
         );
       });
-    } // Cleanup: Desconecta o socket ao desmontar ou se o userId mudar
+    }
 
     return () => {
       if (newSocket) {
@@ -123,11 +122,11 @@ export default function App() {
         newSocket.disconnect();
       }
     };
-  }, [userId]); // Depende apenas do userId
+  }, [userId]);
 
   return (
     <Routes>
-            {/* Rotas de Autenticação */}     {" "}
+      {/* Rotas de Autenticação */}{" "}
       <Route
         path="/login"
         element={
@@ -136,8 +135,7 @@ export default function App() {
             onRegister={handleRegister}
           />
         }
-      />
-           {" "}
+      />{" "}
       <Route
         path="/register"
         element={
@@ -148,21 +146,15 @@ export default function App() {
           />
         }
       />
-            {/* Rotas Protegidas */}     {" "}
+      {/* Rotas Protegidas */}{" "}
       <Route element={<PrivateRoute />}>
-                {/* Rotas Privadas (Injetando props) */}       {" "}
+        {/* Rotas Privadas */}{" "}
         <Route
           path="/"
           element={<HomePage onLogout={handleLogout} userId={userId} />}
-        />
-               {" "}
-        <Route path="/devices" element={<DevicesPage userId={userId} />} />     
-         {" "}
-        <Route
-          path="/devices/register"
-          element={<DeviceRegistration />}
-        />
-               {" "}
+        />{" "}
+        <Route path="/devices" element={<DevicesPage userId={userId} />} />
+        <Route path="/devices/register" element={<DeviceRegistration />} />{" "}
         <Route
           path="/notifications"
           element={
@@ -173,7 +165,7 @@ export default function App() {
           }
         />{" "}
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />   {" "}
+      <Route path="*" element={<Navigate to="/" replace />} />{" "}
     </Routes>
   );
 }

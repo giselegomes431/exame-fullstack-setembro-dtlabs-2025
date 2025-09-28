@@ -1,14 +1,12 @@
-# backend/app/api/endpoints/telemetry.py (código corrigido)
-
 from fastapi import APIRouter, HTTPException
-from ...services.messaging_service import publish_telemetry_message # <-- Importe o serviço
+from ...services.messaging_service import publish_telemetry_message
 
 router = APIRouter()
 
 @router.post("/telemetry")
 def receive_telemetry_data(data: dict):
     try:
-        publish_telemetry_message(data) # <-- Use a função do serviço
+        publish_telemetry_message(data)
         return {"status": "success", "message": "Dados de telemetria recebidos e enviados para a fila."}
     except HTTPException as e:
         return {"status": "error", "message": e.detail}

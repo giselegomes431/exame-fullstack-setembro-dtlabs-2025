@@ -8,7 +8,7 @@ class Settings:
     RABBITMQ_HOST: str = os.environ.get("RABBITMQ_HOST", "rabbitmq")
     RABBITMQ_QUEUE: str = os.environ.get("RABBITMQ_QUEUE", "telemetry_queue")
 
-    # Chave para o JWT (autenticação) - MUDE ISSO EM PRODUÇÃO
+    # Chave para o JWT
     SECRET_KEY: str = os.environ.get("SECRET_KEY", "gisele1409")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30

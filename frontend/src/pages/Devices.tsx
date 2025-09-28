@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { getDevices, getHistoricalData } from "../services/api";
+import {
+  getDevices,
+  getHistoricalData,
+  getLatestTelemetries,
+} from "../services/api";
+import type { TelemetryData } from "../services/api";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -37,9 +42,8 @@ interface HistoricalData {
 }
 
 interface DevicesPageProps {
-    userId: string | null;
+  userId: string | null;
 }
-
 
 // --- Estilos dos Componentes ---
 const MainContent = styled.main`
@@ -94,6 +98,52 @@ const Subtitle = styled.p`
   margin-top: 5px;
 `;
 
+const TelemetrySection = styled.div`
+  margin-top: 40px;
+  h2 {
+    color: #e0e0e0;
+  }
+`;
+
+const TelemetryTableContainer = styled.div`
+  max-height: 400px; /* Limite de altura para o scroll */
+  overflow-y: auto;
+  background-color: #1a1b26; /* Cor de fundo escura */
+  border-radius: 8px;
+  margin-bottom: 20px;
+`;
+
+const TelemetryTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  color: #c0c0c0;
+  margin-bottom: 10px;
+
+  th,
+  td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #333444;
+  }
+
+  th {
+    background-color: #1a1b26;
+    color: #007bff;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  tr:nth-child(even) {
+    background-color: #2a2b38;
+  }
+
+  tr:hover {
+    background-color: #3e4054;
+  }
+`;
+
 // --- Componente da Página ---
 function Devices({ userId }: DevicesPageProps) {
   const [devices, setDevices] = useState<Device[]>([]);
@@ -104,6 +154,21 @@ function Devices({ userId }: DevicesPageProps) {
     temperature: [],
   });
   const [loading, setLoading] = useState(true);
+  const [latestTelemetries, setLatestTelemetries] = useState<TelemetryData[]>(
+    []
+  );
+
+  // Função para buscar as últimas telemetrias
+  const fetchLatestTelemetries = async (deviceUuid: string) => {
+    try {
+      // Usando a função do seu api.ts
+      const response = await getLatestTelemetries(deviceUuid, 20);
+      setLatestTelemetries(response.data);
+    } catch (error) {
+      console.error(`Erro ao buscar telemetrias para ${deviceUuid}:`, error);
+      setLatestTelemetries([]);
+    }
+  };
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -113,6 +178,7 @@ function Devices({ userId }: DevicesPageProps) {
         if (response.data.length > 0) {
           setSelectedDevice(response.data[0].uuid);
           fetchHistoricalData(response.data[0].uuid);
+          fetchLatestTelemetries(response.data[0].uuid);
         }
       } catch (error) {
         console.error("Erro ao buscar dispositivos:", error);
@@ -123,7 +189,18 @@ function Devices({ userId }: DevicesPageProps) {
     fetchDevices();
   }, []);
 
-  const fetchHistoricalData = async (uuid: string, period: string = "last_24h") => {
+  useEffect(() => {
+    if (selectedDevice) {
+      // Rebusca a telemetria detalhada sempre que o dispositivo selecionado mudar
+      fetchLatestTelemetries(selectedDevice);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDevice]);
+
+  const fetchHistoricalData = async (
+    uuid: string,
+    period: string = "last_24h"
+  ) => {
     try {
       // Endpoint para buscar dados históricos de telemetria
       const response = await getHistoricalData(uuid, period);
@@ -143,6 +220,23 @@ function Devices({ userId }: DevicesPageProps) {
   const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (selectedDevice) {
       fetchHistoricalData(selectedDevice, e.target.value);
+    }
+  };
+
+  const formatBootDate = (isoString: string) => {
+    try {
+      const date = new Date(isoString);
+      return date.toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+    } catch {
+      return isoString;
     }
   };
 
@@ -204,7 +298,53 @@ function Devices({ userId }: DevicesPageProps) {
                   </option>
                 ))}
               </select>
+            </FilterPanel>
+            <TelemetrySection>
+              <h2>
+                Últimas Telemetrias (
+                {devices.find((d) => d.uuid === selectedDevice)?.name ||
+                  "Carregando..."}
+                )
+              </h2>
 
+              <TelemetryTableContainer>
+                {latestTelemetries.length > 0 ? (
+                  <TelemetryTable>
+                    <thead>
+                      <tr>
+                        <th>Data/Hora</th>
+                        <th>CPU (%)</th>
+                        <th>RAM (%)</th>
+                        <th>Temp. (°C)</th>
+                        <th>Latência (ms)</th>
+                        <th>Conectiv.</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {latestTelemetries.map((telemetry) => (
+                        <tr key={telemetry.id}>
+                          <td>{formatBootDate(telemetry.boot_date)}</td>
+                          <td>{telemetry.cpu_usage.toFixed(1)}</td>
+                          <td>{telemetry.ram_usage.toFixed(1)}</td>
+                          <td>{telemetry.temperature.toFixed(1)}</td>
+                          <td>{telemetry.latency.toFixed(2)}</td>
+                          <td>
+                            {telemetry.connectivity === 1 ? "OK" : "DOWN"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </TelemetryTable>
+                ) : (
+                  <p
+                    style={{ padding: "20px", textAlign: "center", margin: 0 }}
+                  >
+                    Nenhuma telemetria recente encontrada para este dispositivo.
+                  </p>
+                )}
+              </TelemetryTableContainer>
+            </TelemetrySection>
+            <FilterPanel>
               <span>Período de Análise:</span>
               <select onChange={handlePeriodChange}>
                 <option value="last_24h">Últimas 24h</option>

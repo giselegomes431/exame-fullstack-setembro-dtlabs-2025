@@ -1,5 +1,3 @@
-# backend/app/database/models.py
-
 from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
@@ -52,7 +50,7 @@ class Notification(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
-    device_uuid = Column(UUID(as_uuid=True), ForeignKey('devices.uuid'), nullable=True) # Pode ser nulo se for para todos os devices
+    device_uuid = Column(UUID(as_uuid=True), ForeignKey('devices.uuid'), nullable=True)
     parameter = Column(String, index=True) # Ex: 'cpu_usage'
     operator = Column(String, default=">") # Ex: '>' ou '<'
     threshold = Column(Float) # Ex: 70.0

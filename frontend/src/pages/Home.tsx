@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { getDevices, getLatestTelemetry } from "../services/api";
 import { PageWrapper } from "../components/common/PageWrapper";
 
-// ... (Tipagens) ...
 interface Device {
   uuid: string;
   name: string;
@@ -16,11 +15,10 @@ interface Device {
 }
 
 interface HomePageProps {
-    onLogout: () => void;
-    userId: string | null;
+  onLogout: () => void;
+  userId: string | null;
 }
 
-// Estilos com Styled-components (apenas estilos específicos da Home)
 const PageHeader = styled.header`
   margin-bottom: 40px;
 `;
@@ -105,7 +103,7 @@ function Home(props: HomePageProps) {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [latestTelemetry, setLatestTelemetry] = useState<any>({}); // <-- Novo estado para a telemetria
+  const [latestTelemetry, setLatestTelemetry] = useState<any>({});
 
   useEffect(() => {
     const fetchDevicesAndTelemetry = async () => {
@@ -163,17 +161,23 @@ function Home(props: HomePageProps) {
 
               <StatItem>
                 <StatLabel>Uso de CPU</StatLabel>
-                <StatValue>{latestTelemetry[device.uuid]?.cpu_usage || 'N/A'}%</StatValue>
+                <StatValue>
+                  {latestTelemetry[device.uuid]?.cpu_usage || "N/A"}%
+                </StatValue>
               </StatItem>
-              
+
               <StatItem>
                 <StatLabel>Uso de RAM</StatLabel>
-                <StatValue>{latestTelemetry[device.uuid]?.ram_usage || 'N/A'}%</StatValue>
+                <StatValue>
+                  {latestTelemetry[device.uuid]?.ram_usage || "N/A"}%
+                </StatValue>
               </StatItem>
 
               <StatItem>
                 <StatLabel>Temperatura</StatLabel>
-                <StatValue>{latestTelemetry[device.uuid]?.temperature || 'N/A'}°C</StatValue>
+                <StatValue>
+                  {latestTelemetry[device.uuid]?.temperature || "N/A"}°C
+                </StatValue>
               </StatItem>
             </DeviceCard>
           ))

@@ -1,5 +1,3 @@
-# worker/database/base.py
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from typing import Generator
@@ -19,7 +17,7 @@ Base = declarative_base()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_db() -> Generator:
-    """Retorna uma sessão do banco de dados e a fecha após o uso."""
+    # Retorna uma sessão do banco de dados e a fecha após o uso
     db = SessionLocal()
     try:
         yield db

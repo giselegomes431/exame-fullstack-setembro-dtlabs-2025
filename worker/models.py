@@ -1,4 +1,3 @@
-# worker/models.py
 from sqlalchemy import Column, Float, Integer, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from base import Base

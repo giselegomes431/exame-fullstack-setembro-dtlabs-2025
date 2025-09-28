@@ -1,6 +1,4 @@
-// src/components/common/FormContainer.tsx
-
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const FormContainer = styled.div`
   display: flex;
@@ -11,7 +9,7 @@ export const FormContainer = styled.div`
   width: 100vw;
   background-color: #121212;
   color: #e0e0e0;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   padding: 20px;
   box-sizing: border-box;
 
@@ -32,7 +30,7 @@ export const AuthCard = styled.div`
   max-width: 450px;
 
   /* Removido o align-items: center; e text-align: center; daqui */
-  
+
   @media (max-width: 768px) {
     padding: 25px;
     max-width: 90%;

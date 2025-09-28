@@ -1,5 +1,4 @@
-// src/components/common/PageWrapper.tsx
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const PageWrapper = styled.div`
   padding: 40px;
@@ -7,7 +6,7 @@ export const PageWrapper = styled.div`
   min-height: 100vh;
   width: 100%; /* Corrigido para 100% para evitar overflow horizontal */
   color: #c0c0c0;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   box-sizing: border-box;
   overflow-x: hidden;
 

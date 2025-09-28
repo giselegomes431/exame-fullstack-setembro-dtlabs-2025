@@ -1,4 +1,4 @@
-import { Line } from 'react-chartjs-2';
+import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -6,8 +6,8 @@ import {
   PointElement,
   LineElement,
   Tooltip,
-} from 'chart.js';
-import styled from 'styled-components';
+} from "chart.js";
+import styled from "styled-components";
 
 ChartJS.register(
   CategoryScale,
@@ -39,7 +39,7 @@ export const MiniChart = ({ label, data, color }: MiniChartProps) => {
         label,
         data,
         borderColor: color,
-        backgroundColor: 'transparent', // Fundo transparente
+        backgroundColor: "transparent",
         borderWidth: 2,
         pointRadius: 0,
         tension: 0.4,

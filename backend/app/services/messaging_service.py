@@ -1,5 +1,3 @@
-# backend/app/services/messaging_service.py
-
 import pika
 import json
 import os
@@ -7,7 +5,7 @@ from ..core.config import settings
 from fastapi import HTTPException
 
 def get_rabbitmq_connection():
-    """Conecta ao RabbitMQ e retorna a conexão e o canal."""
+    # Conecta ao RabbitMQ e retorna a conexão e o canal
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.RABBITMQ_HOST))
         channel = connection.channel()
@@ -18,7 +16,6 @@ def get_rabbitmq_connection():
         return None, None
 
 def publish_telemetry_message(telemetry_data: dict):
-    """Publica uma mensagem na fila do RabbitMQ."""
     connection, channel = get_rabbitmq_connection()
     if not connection or not channel:
         raise HTTPException(status_code=500, detail="Could not connect to RabbitMQ.")

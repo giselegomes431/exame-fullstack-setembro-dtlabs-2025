@@ -13,7 +13,7 @@ RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST', 'rabbitmq')
 RABBITMQ_QUEUE = os.environ.get('RABBITMQ_QUEUE', 'telemetry_queue')
 
 def save_telemetry_to_db(data: dict):
-    """Salva dados de telemetria no PostgreSQL."""
+    # Salva dados de telemetria no PostgreSQL
     db: Session = SessionLocal()
     try:
         print(f"[INFO] Recebido para salvar no DB: {data}")
@@ -21,16 +21,14 @@ def save_telemetry_to_db(data: dict):
         boot_date = None
         if boot_date_str:
             try:
-                # Adiciona o tratamento para o formato com Z no final (ISO 8601 com fuso horário)
+                # Adiciona o tratamento para o formato com Z no final
                 boot_date = datetime.fromisoformat(boot_date_str.replace('Z', '+00:00'))
             except ValueError:
-                # Tenta formatar sem substituição, caso o formato seja apenas ISO
+                # Tenta formatar sem substituição caso o formato seja apenas ISO
                 try:
                     boot_date = datetime.fromisoformat(boot_date_str)
                 except Exception as date_e:
                     print(f"[ERRO CONVERSÃO] Falha ao converter boot_date '{boot_date_str}': {date_e}")
-                    # Se falhar, boot_date fica como None, o que pode evitar o crash,
-                    # mas pode indicar um problema na origem do dado.
 
         device_uuid_str = data.get('device_uuid')
         device_uuid = None
@@ -39,9 +37,7 @@ def save_telemetry_to_db(data: dict):
                 device_uuid = uuid.UUID(device_uuid_str)
             except Exception as uuid_e:
                 print(f"[ERRO CONVERSÃO] Falha ao converter device_uuid '{device_uuid_str}': {uuid_e}")
-                # Se falhar, device_uuid fica None, o que provavelmente causará 
-                # um erro de chave estrangeira (ForeignKey) se não for permitido.
-        
+            
         if not device_uuid:
             raise ValueError(f"UUID do dispositivo inválido ou ausente: {device_uuid_str}")
 
@@ -69,7 +65,7 @@ def save_telemetry_to_db(data: dict):
         db.close()
 
 def callback(ch, method, properties, body):
-    """Função chamada para cada mensagem da fila."""
+    # Função chamada para cada mensagem da fila
     try:
         message = json.loads(body)
         print(f"[INFO] Mensagem recebida do RabbitMQ: {message}")
@@ -81,7 +77,7 @@ def callback(ch, method, properties, body):
         print(f"[INFO] Mensagem confirmada no RabbitMQ (ACK).")
 
 def start_consumer():
-    """Inicia o consumidor com reconexão automática."""
+    # Inicia o consumidor com reconexão automática
     while True:
         try:
             print(f"[INFO] Conectando ao RabbitMQ em {RABBITMQ_HOST}...")

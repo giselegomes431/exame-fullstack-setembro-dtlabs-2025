@@ -7,30 +7,24 @@ from datetime import datetime, timedelta
 import uuid
 
 # --- CONFIGURAÇÕES DE AMBIENTE ---
-# Endereços lidos diretamente do Docker Compose
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://backend_app:8000")
 LOGIN_URL = f"{BACKEND_URL}/api/v1/login"
 DEVICES_URL = f"{BACKEND_URL}/api/v1/devices"
 TELEMETRY_ENDPOINT = f"{BACKEND_URL}/telemetry"
 
-# Credenciais de Teste para o Simulador (Deve ser configurado no docker-compose)
+# Credenciais de Teste para o Simulador
 SIM_USERNAME = os.environ.get("SIM_USERNAME", "simulador_user")
 SIM_PASSWORD = os.environ.get("SIM_PASSWORD", "simulador_pass")
 
 # --- Variáveis Globais de Estado ---
-# Lista global para armazenar todos os dispositivos de todos os usuários
 ALL_SIMULATED_DEVICES = []
 
-# --- CONFIGURAÇÃO DE MÚLTIPLOS USUÁRIOS (Cadastre estes na sua API) ---
+# --- CONFIGURAÇÃO DE MÚLTIPLOS USUÁRIOS  ---
 SIMULATOR_USERS = [
     {"username": SIM_USERNAME, "password": SIM_PASSWORD},
-    # Adicione outros usuários de teste que você cadastrou:
-    # {"username": "user2_sim", "password": "pass456"},
 ]
 
-
 def generate_heartbeat(device_uuid: str):
-    """Gera um dicionário com dados de telemetria aleatórios para um UUID específico."""
     return {
         # Adicionado random.uniform para gerar valores float para simulação
         "cpu_usage": round(random.uniform(10.0, 95.0), 2), 
@@ -44,7 +38,7 @@ def generate_heartbeat(device_uuid: str):
     }
 
 def send_heartbeat(device_uuid: str, token: str):
-    """Envia os dados de telemetria para a API."""
+    # Envia os dados de telemetria para a API
     heartbeat_data = generate_heartbeat(device_uuid)
     headers = {"Authorization": f"Bearer {token}"}
     
@@ -65,13 +59,12 @@ def send_heartbeat(device_uuid: str, token: str):
         return False
 
 def login_and_fetch_devices():
-    """Faz login para todos os usuários e coleta seus dispositivos e tokens."""
+    # Faz login para todos os usuários e coleta seus dispositivos e tokens
     global ALL_SIMULATED_DEVICES
     ALL_SIMULATED_DEVICES = []
     
     for sim_user in SIMULATOR_USERS:
         try:
-            # 1. Login
             login_response = requests.post(LOGIN_URL, json={"username": sim_user["username"], "password": sim_user["password"]})
             login_response.raise_for_status()
             
@@ -81,11 +74,11 @@ def login_and_fetch_devices():
                 
             headers = {"Authorization": f"Bearer {token}"}
             
-            # 2. Buscar Dispositivos (Rota Protegida)
+            # Buscar Dispositivos
             devices_response = requests.get(DEVICES_URL, headers=headers)
             devices_response.raise_for_status()
             
-            # 3. Armazena o UUID do dispositivo e o Token do usuário
+            # Armazena o UUID do dispositivo e o Token do usuário
             for device in devices_response.json():
                 ALL_SIMULATED_DEVICES.append({
                     "uuid": device['uuid'],
@@ -111,7 +104,7 @@ if __name__ == "__main__":
         
         # Envia um heartbeat único para CADA dispositivo
         for device_data in ALL_SIMULATED_DEVICES:
-            # Se o envio falhar (token expirado ou erro de conexão), tenta refazer o login
+            # Se o envio falhar tenta refazer o login
             if not send_heartbeat(device_data['uuid'], device_data['token']):
                 login_and_fetch_devices() # Tenta refazer login e atualizar todos os tokens
                 
