@@ -18,10 +18,33 @@ def save_telemetry_to_db(data: dict):
     try:
         print(f"[INFO] Recebido para salvar no DB: {data}")
         boot_date_str = data.get('boot_date')
-        boot_date = datetime.fromisoformat(boot_date_str.replace('Z', '+00:00')) if boot_date_str else None
+        boot_date = None
+        if boot_date_str:
+            try:
+                # Adiciona o tratamento para o formato com Z no final (ISO 8601 com fuso horário)
+                boot_date = datetime.fromisoformat(boot_date_str.replace('Z', '+00:00'))
+            except ValueError:
+                # Tenta formatar sem substituição, caso o formato seja apenas ISO
+                try:
+                    boot_date = datetime.fromisoformat(boot_date_str)
+                except Exception as date_e:
+                    print(f"[ERRO CONVERSÃO] Falha ao converter boot_date '{boot_date_str}': {date_e}")
+                    # Se falhar, boot_date fica como None, o que pode evitar o crash,
+                    # mas pode indicar um problema na origem do dado.
 
         device_uuid_str = data.get('device_uuid')
-        device_uuid = uuid.UUID(device_uuid_str) if device_uuid_str else None
+        device_uuid = None
+        if device_uuid_str:
+            try:
+                device_uuid = uuid.UUID(device_uuid_str)
+            except Exception as uuid_e:
+                print(f"[ERRO CONVERSÃO] Falha ao converter device_uuid '{device_uuid_str}': {uuid_e}")
+                # Se falhar, device_uuid fica None, o que provavelmente causará 
+                # um erro de chave estrangeira (ForeignKey) se não for permitido.
+        
+        if not device_uuid:
+            raise ValueError(f"UUID do dispositivo inválido ou ausente: {device_uuid_str}")
+
 
         telemetry = Telemetry(
             cpu_usage=data.get('cpu_usage'),
@@ -37,14 +60,11 @@ def save_telemetry_to_db(data: dict):
         db.add(telemetry)
         db.commit()
         db.refresh(telemetry)
-        print(f"[INFO] Telemetria salva no DB: id={telemetry.id}")
+        print(f"[INFO] Telemetria salva no DB: id={telemetry.id}, device={telemetry.device_uuid}")
         
-        if telemetry.cpu_usage > 90:  # ajuste o limite conforme seu alerta
-            print(f"[ALERTA] CPU alta! {telemetry.cpu_usage}% para o dispositivo {telemetry.device_uuid}")
-
     except Exception as e:
         db.rollback()
-        print(f"[ERRO] Falha ao salvar telemetria: {e}")
+        print(f"[ERRO FATAL SALVAMENTO] Falha ao salvar telemetria para {device_uuid_str}: {e}")
     finally:
         db.close()
 
