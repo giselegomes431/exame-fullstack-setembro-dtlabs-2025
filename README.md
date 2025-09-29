@@ -79,8 +79,8 @@ Após iniciar a aplicação, a API oferece documentação interativa:
 ### 2. Clonar o Repositório  
 
 ```bash
-git clone https://github.com/seu-usuario/seu-repositorio.git
-cd seu-repositorio
+git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/giselegomes431/exame-fullstack-setembro-dtlabs-2025.git)
+cd exame-fullstack-setembro-dtlabs-2025
 ```
 
 ### 3. Subir e Acessar (Recomendado)
