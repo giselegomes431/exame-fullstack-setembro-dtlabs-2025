@@ -33,7 +33,7 @@ def override_set_cache(key: str, value: dict, ttl_seconds: int):
 def override_clear_cache(key: str):
     return mock_cache.clear_cache(key)
 
-# 🚨 Aplica a sobrescrita aos endpoints ANTES de rodar os testes
+# Aplica a sobrescrita aos endpoints ANTES de rodar os testes
 devices_endpoint.get_cache = override_get_cache
 devices_endpoint.set_cache = override_set_cache
 devices_endpoint.clear_cache = override_clear_cache

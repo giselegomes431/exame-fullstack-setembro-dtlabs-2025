@@ -17,13 +17,10 @@ DUMMY_DEVICE_DATA = {
 # Fixture para configurar dados de telemetria no banco de dados de teste
 @pytest.fixture(scope="module")
 def setup_telemetry_data(authenticated_client: Client):
-    """Cria um dispositivo e insere dados de telemetria mockados."""
-    
-    # 1. Cria o dispositivo e obtém o UUID
+    # Cria um dispositivo e insere dados de telemetria mockados
     response = authenticated_client.post("/api/v1/devices", json=DUMMY_DEVICE_DATA)
     device_uuid = response.json()["uuid"]
     
-    # 2. Insere dados de telemetria diretamente no DB (mockando o worker)
     # Sobrescreve a dependência get_db para obter a sessão de teste
     db_generator = fastapi_app.dependency_overrides.get(get_db)
     db = next(db_generator())
@@ -55,7 +52,7 @@ def setup_telemetry_data(authenticated_client: Client):
     return device_uuid
 
 def test_get_latest_telemetry_list(authenticated_client: Client, setup_telemetry_data: str):
-    """Verifica se a lista de últimas telemetrias retorna dados corretamente."""
+    # Verifica se a lista de últimas telemetrias retorna dados corretamente
     device_uuid = setup_telemetry_data
     
     response = authenticated_client.get(f"/api/v1/devices/{device_uuid}/latest-telemetry-list", params={"limit": 5})
@@ -67,7 +64,7 @@ def test_get_latest_telemetry_list(authenticated_client: Client, setup_telemetry
     assert telemetries[0]["cpu_usage"] > telemetries[-1]["cpu_usage"]
 
 def test_get_historical_data_24h(authenticated_client: Client, setup_telemetry_data: str):
-    """Verifica se a rota de dados históricos (24h) retorna dados agregados por hora."""
+    # Verifica se a rota de dados históricos (24h) retorna dados agregados por hora
     device_uuid = setup_telemetry_data
     
     response = authenticated_client.get(f"/api/v1/devices/{device_uuid}/historical", params={"period": "last_24h"})
@@ -77,14 +74,10 @@ def test_get_historical_data_24h(authenticated_client: Client, setup_telemetry_d
     assert "timestamps" in data
     assert "cpu_usage" in data
     
-    # Verifica se o número de pontos de dados está correto (deve ser 24)
-    # Como os dados mockados são 48 horas e a agregação é por hora, 
-    # e o filtro é de 24h, esperamos cerca de 24 pontos.
-    # Usamos len(timestamps) para verificar o número de 'buckets' agregados.
     assert len(data["timestamps"]) <= 25 and len(data["timestamps"]) >= 23 
     
 def test_get_latest_telemetry_dashboard(authenticated_client: Client, setup_telemetry_data: str):
-    """Verifica se o endpoint do dashboard retorna a última telemetria por dispositivo."""
+    # Verifica se o endpoint do dashboard retorna a última telemetria por dispositivo
     
     # A rota deve retornar um dicionário onde a chave é o UUID
     response = authenticated_client.get("/api/v1/devices/latest-telemetry")

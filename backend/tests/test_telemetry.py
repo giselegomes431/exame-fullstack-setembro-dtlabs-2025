@@ -3,7 +3,7 @@ from httpx import Client
 from unittest.mock import patch
 import uuid
 
-# Mock de dados de telemetria. O UUID deve ser válido no formato.
+# Mock de dados de telemetria. O UUID deve ser válido no formato
 VALID_TELEMETRY_DATA = {
     "cpu_usage": 55.0,
     "ram_usage": 30.5,
@@ -16,11 +16,7 @@ VALID_TELEMETRY_DATA = {
 
 @patch('backend.app.api.endpoints.telemetry.publish_telemetry_message')
 def test_receive_telemetry_success(mock_publish, client: Client):
-    """
-    Testa se o endpoint recebe dados e chama o publicador de mensagens corretamente.
-    
-    Usa @patch para substituir a função real 'publish_telemetry_message' por um mock.
-    """
+    # Testa se o endpoint recebe dados e chama o publicador de mensagens corretamente
     
     response = client.post("/telemetry", json=VALID_TELEMETRY_DATA)
     
@@ -31,21 +27,19 @@ def test_receive_telemetry_success(mock_publish, client: Client):
     assert response.json()["status"] == "success"
     assert "recebidos e enviados para a fila" in response.json()["message"]
     
-    # 🚨 Verifica se a função de publicação FOI CHAMADA com os dados corretos
     mock_publish.assert_called_once_with(VALID_TELEMETRY_DATA)
 
 @patch('backend.app.api.endpoints.telemetry.publish_telemetry_message')
 def test_receive_telemetry_error_handling(mock_publish, client: Client):
-    """
-    Testa se o endpoint lida corretamente com exceções no serviço de mensageria.
-    """
+    # Testa se o endpoint lida corretamente com exceções no serviço de mensageria.
+
     # Configura o mock para levantar uma exceção simulando uma falha de conexão/publicação
     mock_publish.side_effect = Exception("Falha de conexão com RabbitMQ simulada")
     
     response = client.post("/telemetry", json=VALID_TELEMETRY_DATA)
     
     # Verifica o status HTTP
-    assert response.status_code == 200 # A API retorna 200, mas com status: error
+    assert response.status_code == 200
     
     # Verifica se a resposta JSON reflete o erro interno
     assert response.json()["status"] == "error"
